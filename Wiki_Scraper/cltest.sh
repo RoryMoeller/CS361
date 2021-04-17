@@ -1,0 +1,1 @@
+python3 scraper.py -i https://en.wikipedia.org/wiki/Stovepipe_system -o tempfile --URL_Format Full --titles --std_filters
