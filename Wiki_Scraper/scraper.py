@@ -8,6 +8,7 @@ import socket
 # -o [output file]
 # -i [input URL]
 # -d [delimiter]
+# -e [substring to filter from results]
 # --URL_Format [Full / Short]
 # --titles (adds a tab character and appends the title of the page a link goes to)
 # --std_filters (adds a set of common non-useful internal links to the exclusion list)
