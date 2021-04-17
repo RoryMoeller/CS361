@@ -14,12 +14,14 @@
 python3 scraper.py -i [link to wikipedia page] -o [output file name]
 ```
 #### An example CL IO script can be found [here](cltest.sh)
+---
 ### Socket IPC Version
 Supplying the I/O from a socket connection requires a specified port number. This is templated as:
 ```
 python3 scraper.py -s [port number]
 ```
-#### An example python3 socket IO script can be found [here](sockettest.py)
+#### Do NOT supply the script with an exposed port.
+#### An example python3 socket IO script can be found [here](sockettest.py).
 ---
 ## All options
 |Option|Effect|
