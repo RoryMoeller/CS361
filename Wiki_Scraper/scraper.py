@@ -128,7 +128,6 @@ def set_settings(argv, settings):
 
 # Validate links as internal
 def valid_link(href):
-    string = str(href)
     if "/wiki/" != str(href)[:6]:
         return False
     else:
@@ -157,7 +156,6 @@ def get_links(url, settings):
                 if settings.titles:
                     returner += ("\n\t" + i.get_text())
                 returner += settings.delimiter
-
     return returner
 
 # Process input/output from the commandline parameters
@@ -184,8 +182,6 @@ def socketings(settings):
             links = get_links(req, settings)
             connection.send(links.encode())
             connection.close()
-
-    print("have not made yet")
 
 # Set & validate settings. Run appropriate I/O mode function
 def main(argv):
