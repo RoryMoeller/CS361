@@ -3,6 +3,7 @@ from sys import argv
 import requests
 from bs4 import BeautifulSoup
 import socket
+from os import path, makedirs
 
 # -s [socket number]
 # -o [output file]
@@ -15,6 +16,7 @@ import socket
 #       ['wiki/Category:', 'wiki/Help:', 'wiki/Template', 'wiki/Wikipedia:']
 # --other_target [tag-to-find,sub-attribute-to-report]
 # --require [substring to require in each attribute]
+# --save_image [subfolder to save images in]
 
 # Class for handling, setting & validating the various settings that can be passed when running the file
 class Settings:
@@ -23,6 +25,7 @@ class Settings:
         self.output_file = False
         self.socket_num = False
         self.titles = False
+        self.save_image = False
         self.url_format = "Short"
         self.delimiter = '\n'
         self.target = ["a","href"]
@@ -39,7 +42,8 @@ class Settings:
             "\nexclusion_list = " + str(self.exclusions) + \
             "\nrequirement_list = " + str(self.requirements) + \
             "\ntarget tag = " + str(self.target[0]) + \
-            "\ntarget attribute = " + str(self.target[1])
+            "\ntarget attribute = " + str(self.target[1]) +\
+            "\nsave image location = " + str(self.save_image)
     def set_input_url(self, url):
         if self.socket_num:
             print("Cannot set input URL when using socket I/O")
@@ -74,6 +78,11 @@ class Settings:
         lst = string.split(',')
         self.target[0] = lst[0]
         self.target[1] = lst[1]
+    def set_save_location(self,string):
+        self.save_image = string
+        if not path.exists(string):
+            makedirs(string)
+            print("[+] Made directory named " + string)
     def validate(self):
         if ( self.socket_num ) or ( self.output_file and self.input_url ):
             pass
@@ -86,6 +95,9 @@ class Settings:
                 print("[!] Warning: URL format should often be set to short when using other target\nContinuing...")
             if self.titles:
                 print("[!] Warning: Turning on titles may add unexpected text when using other target\nContinuing...")
+        if self.save_image and self.target != ["img","src"]:
+            print("[!] Cannot save images if target is not img,src")
+            return False
         return True
         
 
@@ -101,7 +113,8 @@ def print_option():
     --titles (adds a tab character and appends the title of the page a link goes to) \n\
     --URL_Format [Full / Short] \n\
     --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
-    --other_target [tag,attribute]")
+    --other_target [tag,attribute] \n\
+    --save_image [subfolder]")
 def print_options(problem):
     print(problem)
     print("Valid options are: \n\
@@ -114,7 +127,8 @@ def print_options(problem):
     --titles (adds a tab character and appends the title of the page a link goes to) \n\
     --URL_Format [Full / Short] \n\
     --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
-    --other_target [tag,attribute]")
+    --other_target [tag,attribute] \n\
+    --save_image [subfolder]")
 
 # Take settings out of argv and put them into a Settings object
 def set_settings(argv, settings):
@@ -122,7 +136,7 @@ def set_settings(argv, settings):
         print_options("Expected at least one option")
         exit(1)
     try:
-        options_and_vals, otherargs = getopt.getopt(argv[1:], "s:o:i:d:e:", ["URL_Format=", "std_filters", "titles", "other_target=", "require="])
+        options_and_vals, otherargs = getopt.getopt(argv[1:], "s:o:i:d:e:", ["URL_Format=", "std_filters", "titles", "other_target=", "require=", "save_image="])
     except getopt.GetoptError:
         print_options("Invalid option passed.")
         exit(1)
@@ -151,6 +165,8 @@ def set_settings(argv, settings):
             settings.set_url_format(i[1])
         elif i[0] == "--other_target":
             settings.set_target(i[1])
+        elif i[0] == "--save_image":
+            settings.set_save_location(i[1])
         
     if len(otherargs) > 0:
         print("[!] Warning:\tIgnoring the following args:")
@@ -187,6 +203,8 @@ def get_links(url, settings):
                     add_link = False
                     break
             if add_link:
+                if settings.save_image:
+                    save_image_to_file(settings, href)
                 if settings.url_format == "Full":
                     returner += "https://en.wikipedia.org"
                 try:
@@ -204,10 +222,31 @@ def cl_io(settings):
     links = get_links(settings.input_url, settings)
     output.write(links)
 
+def save_image_to_file(settings, src):
+    if src[:2] == "//":
+        src = src[2:]
+    if src[len(src)-4] != ".": # Avoid trying to save non-directly linked images
+        print("Skipping " + src)
+        return
+    if src[:5] != "http":
+        src = "https://" + src
+    file_name = settings.save_image
+    pos = src.rfind("/") # Should capture position of last /
+    file_name += src[pos:] # Appends the file name from wikipedia
+    print("Saving image to " + file_name)
+    image_file = open(file_name, 'wb') # Create the file
+    response = requests.get(url=src) # Get the image
+    image_file.write(response.content) # Print to file
+    image_file.close() # Done with file
+
 # Process continuous input/output from a socket connection
 def socketings(settings):
     s = socket.socket()
-    s.bind(('localhost', int(settings.socket_num)))
+    try:
+        s.bind(('localhost', int(settings.socket_num)))
+    except OSError:
+        print("[!] Unable to bind on that port.\nExiting...")
+        exit(1)
     s.listen(1)
     print("\nNow listening on port ", settings.socket_num)
     while 1:
