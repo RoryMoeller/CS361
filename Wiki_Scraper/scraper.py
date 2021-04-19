@@ -13,6 +13,8 @@ import socket
 # --titles (adds a tab character and appends the title of the page a link goes to)
 # --std_filters (adds a set of common non-useful internal links to the exclusion list)
 #       ['wiki/Category:', 'wiki/Help:', 'wiki/Template', 'wiki/Wikipedia:']
+# --other_target [tag-to-find,sub-attribute-to-report]
+# --require [substring to require in each attribute]
 
 # Class for handling, setting & validating the various settings that can be passed when running the file
 class Settings:
@@ -23,6 +25,8 @@ class Settings:
         self.titles = False
         self.url_format = "Short"
         self.delimiter = '\n'
+        self.target = ["a","href"]
+        self.requirements = []
         self.exclusions = []
     def __str__(self):
         return \
@@ -32,7 +36,10 @@ class Settings:
             "\nurl_format = " + str(self.url_format) +\
             "\ndelimiter = \"" + str(self.delimiter) + "\"" +\
             "\ntitles = \"" + str(self.titles) + "\"" +\
-            "\nexclusion_list = " + str(self.exclusions)
+            "\nexclusion_list = " + str(self.exclusions) + \
+            "\nrequirement_list = " + str(self.requirements) + \
+            "\ntarget tag = " + str(self.target[0]) + \
+            "\ntarget attribute = " + str(self.target[1])
     def set_input_url(self, url):
         if self.socket_num:
             print("Cannot set input URL when using socket I/O")
@@ -61,13 +68,26 @@ class Settings:
         self.titles = True
     def add_exclusion(self, string):
         self.exclusions.append(string)
+    def add_requirement(self, string):
+        self.requirements.append(string)
+    def set_target(self, string):
+        lst = string.split(',')
+        self.target[0] = lst[0]
+        self.target[1] = lst[1]
     def validate(self):
         if ( self.socket_num ) or ( self.output_file and self.input_url ):
-            return True
+            pass
         else:
             print("[!] Invalid options set.\nMake sure one I/O method is set.\nIf not using sockets, ensure both an input URL and an output file are set.\nCurrent settings:")
             print(self)
             return False
+        if self.target != ['a',"href"]:
+            if self.url_format != "Short":
+                print("[!] Warning: URL format should often be set to short when using other target\nContinuing...")
+            if self.titles:
+                print("[!] Warning: Turning on titles may add unexpected text when using other target\nContinuing...")
+        return True
+        
 
 # Functions for helping users when incorrect usage is noticed
 def print_option():
@@ -76,9 +96,12 @@ def print_option():
     -o [output file] \n\
     -i [input URL] \n\
     -d [delimiter] \n\
+    -e [substring to filter from results] \n\
+    --require [substring to require in result attribute] \n\
     --titles (adds a tab character and appends the title of the page a link goes to) \n\
     --URL_Format [Full / Short] \n\
-    --std_filters (adds a set of common internal links to non-article pages to the exclusion list)")
+    --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
+    --other_target [tag,attribute]")
 def print_options(problem):
     print(problem)
     print("Valid options are: \n\
@@ -86,9 +109,12 @@ def print_options(problem):
     -o [output file] \n\
     -i [input URL] \n\
     -d [delimiter] \n\
+    -e [substring to filter from results] \n\
+    --require [substring to require in result attribute] \n\
     --titles (adds a tab character and appends the title of the page a link goes to) \n\
     --URL_Format [Full / Short] \n\
-    --std_filters (adds a set of common internal links to non-article pages to the exclusion list)")
+    --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
+    --other_target [tag,attribute]")
 
 # Take settings out of argv and put them into a Settings object
 def set_settings(argv, settings):
@@ -96,7 +122,7 @@ def set_settings(argv, settings):
         print_options("Expected at least one option")
         exit(1)
     try:
-        options_and_vals, otherargs = getopt.getopt(argv[1:], "s:o:i:d:e:", ["URL_Format=", "std_filters", "titles"])
+        options_and_vals, otherargs = getopt.getopt(argv[1:], "s:o:i:d:e:", ["URL_Format=", "std_filters", "titles", "other_target=", "require="])
     except getopt.GetoptError:
         print_options("Invalid option passed.")
         exit(1)
@@ -119,8 +145,13 @@ def set_settings(argv, settings):
             settings.add_exclusion("wiki/Help:")
             settings.add_exclusion("wiki/Template")
             settings.add_exclusion("wiki/Wikipedia:")
-        else:
+        elif i[0] == "--require":
+            settings.add_requirement(i[1])
+        elif i[0] == "URL_Format":
             settings.set_url_format(i[1])
+        elif i[0] == "--other_target":
+            settings.set_target(i[1])
+        
     if len(otherargs) > 0:
         print("[!] Warning:\tIgnoring the following args:")
         for i in otherargs:
@@ -140,19 +171,28 @@ def get_links(url, settings):
     data = response.text
     BSObject = BeautifulSoup(data, "html.parser")
     body = BSObject.find("div", {"id": "content"})
-    all_links = body.find_all("a")
+    all_links = body.find_all(settings.target[0])
     for i in all_links:
-        href = i.get("href")
-        if valid_link(href) and len(str(i.get_text())) > 0:
+        href = i.get(settings.target[1])
+        if ( valid_link(href) and len(str(i.get_text())) > 0 ) or settings.target != ['a',"href"]:
             add_link = True
+            if href == None:
+                add_link = False
             for j in settings.exclusions:
-                if j in href:
+                if add_link and j in href:
+                    add_link = False
+                    break
+            for j in settings.requirements:
+                if add_link and j not in href:
                     add_link = False
                     break
             if add_link:
                 if settings.url_format == "Full":
                     returner += "https://en.wikipedia.org"
-                returner += href
+                try:
+                    returner += href
+                except TypeError: # This should be caught by checking href == None. 
+                    print("[!] Warning: Fetched invalid data from attribute.") 
                 if settings.titles:
                     returner += ("\n\t" + i.get_text())
                 returner += settings.delimiter
