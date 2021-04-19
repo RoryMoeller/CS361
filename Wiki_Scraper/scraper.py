@@ -94,7 +94,7 @@ class Settings:
             if self.url_format != "Short":
                 print("[!] Warning: URL format should often be set to short when using other target\nContinuing...")
             if self.titles:
-                print("[!] Warning: Turning on titles may add unexpected text when using other target\nContinuing...")
+                print("[!] Warning: Turning on titles may add unexpected text when using non-default target\nContinuing...")
         if self.save_image and self.target != ["img","src"]:
             print("[!] Cannot save images if target is not img,src")
             return False
