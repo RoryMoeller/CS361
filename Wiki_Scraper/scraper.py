@@ -174,8 +174,8 @@ def set_settings(argv, settings):
             print("\t" + i)
 
 # Validate links as internal
-def valid_link(href):
-    if "/wiki/" != str(href)[:6]:
+def valid_link(attribute_value):
+    if "/wiki/" != str(attribute_value)[:6]:
         return False
     else:
         return True
@@ -189,27 +189,27 @@ def get_links(url, settings):
     body = BSObject.find("div", {"id": "content"})
     all_links = body.find_all(settings.target[0])
     for i in all_links:
-        href = i.get(settings.target[1])
-        if ( valid_link(href) and len(str(i.get_text())) > 0 ) or settings.target != ['a',"href"]:
+        attr_val = i.get(settings.target[1])
+        if ( valid_link(attr_val) and len(str(i.get_text())) > 0 ) or settings.target != ['a',"href"]:
             add_link = True
-            if href == None:
+            if attr_val == None:
                 add_link = False
             for j in settings.exclusions:
-                if add_link and j in href:
+                if add_link and j in attr_val:
                     add_link = False
                     break
             for j in settings.requirements:
-                if add_link and j not in href:
+                if add_link and j not in attr_val:
                     add_link = False
                     break
             if add_link:
                 if settings.save_image:
-                    save_image_to_file(settings, href)
+                    save_image_to_file(settings, attr_val)
                 if settings.url_format == "Full":
                     returner += "https://en.wikipedia.org"
                 try:
-                    returner += href
-                except TypeError: # This should be caught by checking href == None. 
+                    returner += attr_val
+                except TypeError: # This should be caught by checking attr_val == None. 
                     print("[!] Warning: Fetched invalid data from attribute.") 
                 if settings.titles:
                     returner += ("\n\t" + i.get_text())
