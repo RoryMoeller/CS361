@@ -1,9 +1,9 @@
 import getopt
-from sys import argv
 import requests
-from bs4 import BeautifulSoup
 import socket
+from bs4 import BeautifulSoup
 from os import path, makedirs
+from sys import argv, stderr
 
 # -s [socket number]
 # -o [output file]
@@ -46,17 +46,17 @@ class Settings:
             "\nsave image location = " + str(self.save_image)
     def set_input_url(self, url):
         if self.socket_num:
-            print("Cannot set input URL when using socket I/O")
+            print("Cannot set input URL when using socket I/O", file=stderr)
             exit(1)
         self.input_url = url
     def set_output_file(self, output):
         if self.socket_num:
-            print("Cannot set output file when using socket I/O")
+            print("Cannot set output file when using socket I/O", file=stderr)
             exit(1)
         self.output_file = output
     def set_socket_num(self, num):
         if self.input_url or self.output_file:
-            print("Cannot use socket I/O with other I/O methods")
+            print("Cannot use socket I/O with other I/O methods", file=stderr)
             exit(1)
         else:
             self.socket_num = num
@@ -64,7 +64,7 @@ class Settings:
         self.delimiter = string
     def set_url_format(self, urlformat):
         if urlformat not in ["Short", "Full"]:
-            print("Invalid URL Format. Valid inputs are \"Short\" and \"Full\"")
+            print("Invalid URL Format. Valid inputs are \"Short\" and \"Full\"", file=stderr)
             exit(1)
         else:
             self.url_format = urlformat
@@ -82,21 +82,21 @@ class Settings:
         self.save_image = string
         if not path.exists(string):
             makedirs(string)
-            print("[+] Made directory named " + string)
+            print("[+] Made directory named " + string, file=stderr)
     def validate(self):
         if ( self.socket_num ) or ( self.output_file and self.input_url ):
             pass
         else:
-            print("[!] Invalid options set.\nMake sure one I/O method is set.\nIf not using sockets, ensure both an input URL and an output file are set.\nCurrent settings:")
-            print(self)
+            print("[!] Invalid options set.\nMake sure one I/O method is set.\nIf not using sockets, ensure both an input URL and an output file are set.\nCurrent settings:", file=stderr)
+            print(self, file=stderr)
             return False
         if self.target != ['a',"href"]:
             if self.url_format != "Short":
-                print("[!] Warning: URL format should often be set to short when using other target\nContinuing...")
+                print("[!] Warning: URL format should often be set to short when using other target\nContinuing...", file=stderr)
             if self.titles:
-                print("[!] Warning: Turning on titles may add unexpected text when using non-default target\nContinuing...")
+                print("[!] Warning: Turning on titles may add unexpected text when using non-default target\nContinuing...", file=stderr)
         if self.save_image and self.target != ["img","src"]:
-            print("[!] Cannot save images if target is not img,src")
+            print("[!] Cannot save images if target is not img,src", file=stderr)
             return False
         return True
         
@@ -114,9 +114,9 @@ def print_option():
     --URL_Format [Full / Short] \n\
     --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
     --other_target [tag,attribute] \n\
-    --save_image [subfolder]")
+    --save_image [subfolder]", file=stderr)
 def print_options(problem):
-    print(problem)
+    print(problem, file=stderr)
     print("Valid options are: \n\
     -s [socket number] \n\
     -o [output file] \n\
@@ -128,7 +128,7 @@ def print_options(problem):
     --URL_Format [Full / Short] \n\
     --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
     --other_target [tag,attribute] \n\
-    --save_image [subfolder]")
+    --save_image [subfolder]", file=stderr)
 
 # Take settings out of argv and put them into a Settings object
 def set_settings(argv, settings):
@@ -169,9 +169,9 @@ def set_settings(argv, settings):
             settings.set_save_location(i[1])
         
     if len(otherargs) > 0:
-        print("[!] Warning:\tIgnoring the following args:")
+        print("[!] Warning:\tIgnoring the following args:", file=stderr)
         for i in otherargs:
-            print("\t" + i)
+            print("\t" + i, file=stderr)
 
 # Validate links as internal
 def valid_link(attribute_value):
@@ -210,7 +210,7 @@ def get_links(url, settings):
                 try:
                     returner += attr_val
                 except TypeError: # This should be caught by checking attr_val == None. 
-                    print("[!] Warning: Fetched invalid data from attribute.") 
+                    print("[!] Warning: Fetched invalid data from attribute.", file=stderr) 
                 if settings.titles:
                     returner += ("\n\t" + i.get_text())
                 returner += settings.delimiter
@@ -226,14 +226,14 @@ def save_image_to_file(settings, src):
     if src[:2] == "//":
         src = src[2:]
     if src[len(src)-4] != ".": # Avoid trying to save non-directly linked images
-        print("Skipping " + src)
+        print("Skipping " + src, file=stderr)
         return
     if src[:5] != "http":
         src = "https://" + src
     file_name = settings.save_image
     pos = src.rfind("/") # Should capture position of last /
     file_name += src[pos:] # Appends the file name from wikipedia
-    print("Saving image to " + file_name)
+    print("Saving image to " + file_name, file=stderr)
     image_file = open(file_name, 'wb') # Create the file
     response = requests.get(url=src) # Get the image
     image_file.write(response.content) # Print to file
@@ -245,19 +245,19 @@ def socketings(settings):
     try:
         s.bind(('localhost', int(settings.socket_num)))
     except OSError:
-        print("[!] Unable to bind on that port.\nExiting...")
+        print("[!] Unable to bind on that port.\nExiting...", file=stderr)
         exit(1)
     s.listen(1)
-    print("\nNow listening on port ", settings.socket_num)
+    print("\nNow listening on port ", settings.socket_num, file=stderr)
     while 1:
         connection, address = s.accept()
-        print("connected", address)
+        print("connected", address, file=stderr)
         req = connection.recv(1024).decode() # what to do about size limit...
         if len(req) > 100:
             connection.send("Length of request is too long".encode())
             connection.close()
         else:
-            print("Fetching URL " + str(req))
+            print("Fetching URL " + str(req), file=stderr)
             links = get_links(req, settings)
             connection.send(links.encode())
             connection.close()
@@ -268,7 +268,7 @@ def main(argv):
     set_settings(argv, settings)
     if not settings.validate():
         exit(1)
-    print(settings)
+    # print(settings, file=stderr) # Don't really need this outside of debugging. Could add as option maybe
     if settings.socket_num == 0:
         cl_io(settings)
     else:
