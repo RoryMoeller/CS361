@@ -30,7 +30,7 @@ python3 scraper.py -s [port number]
 `-s` [port] | Should run in socket mode & use the supplied port number
 `-o` [output file] | Should run in CL_IO mode & use the supplied filename as the output destination.
 `-i` [input URL] | Required when running in CL_IO mode. Uses the input url as the target
-`-d` [delimiter] | Use the supplied delimiter to seperate the links.
+`-d` [delimiter] | Use the supplied delimiter to separate the links.
 `-e` [exclusion] | Do not include links in the response if they contain any exclusion. Can have multiple -e options.
 `--require` [required substring] | Discard results that do not contain the substring in their attributes. Can have multiple --require options.
 `--URL_Format` ["Short"/"Full"] | Default is Full. Shortened URL format will factor out the prepended "http...wikipedia.org"
@@ -48,7 +48,7 @@ python3 scraper.py -s [port number]
 Additional options are added for extended functionality
 |Option|Effect|
 ---|---
-`--other_target` [tag,attribute] | Scrape for the content of "\<tag>'s" "attribute"
+`--other_target` [tag,attribute] | Scrape for the content of "attribute" from "tag"
 `--save_image` [subdirectory] | If scraping for image links, save scraped images to "subdirectory"
 ### Non anchor-href targets
 This service can also be used to scrape non-anchor tags and non-href attributes by using `--other_target` and supplying the new target tag and attribute pair to scrape for. Note regarding this use case:
