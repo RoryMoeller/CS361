@@ -60,7 +60,7 @@ class Settings:
             exit(1)
         else:
             self.socket_num = num
-    def set_delimiter(string):
+    def set_delimiter(self, string):
         self.delimiter = string
     def set_url_format(self, urlformat):
         if urlformat not in ["Short", "Full"]:
@@ -68,8 +68,8 @@ class Settings:
             exit(1)
         else:
             self.url_format = urlformat
-    def include_titles(self):
-        self.titles = True
+    def set_titles(self, boolarg):
+        self.titles = boolarg
     def add_exclusion(self, string):
         self.exclusions.append(string)
     def add_requirement(self, string):
@@ -84,6 +84,7 @@ class Settings:
             makedirs(string)
             print("[+] Made directory named " + string, file=stderr)
     def validate(self):
+    
         if ( self.socket_num ) or ( self.output_file and self.input_url ):
             pass
         else:
@@ -99,7 +100,36 @@ class Settings:
             print("[!] Cannot save images if target is not img,src", file=stderr)
             return False
         return True
-        
+    def get_commandline(self):
+        command_list = ["python", "Wiki_Scraper/scraper.py"]
+        if self.input_url:
+            command_list.append( "-i") 
+            command_list.append(str(self.input_url))
+        if self.output_file:
+            command_list.append("-o")
+            command_list.append(str(self.output_file))
+        if self.socket_num:
+            command_list.append("-s")
+            command_list.append(str(self.socket_num))
+        if self.titles:
+            command_list.append("--titles")
+        if self.save_image:
+            command_list.append("--save_image")
+            command_list.append(self.save_image)
+        for i in self.requirements:
+            command_list.append("--require")
+            command_list.append(i)
+        for i in self.requirements:
+            command_list.append("-e")
+            command_list.append(i)
+        command_list.append("-d")
+        command_list.append(str(self.delimiter))
+        command_list.append("--URL_Format")
+        command_list.append(self.url_format)
+        command_list.append("--other_target")
+        command_list.append(",".join(self.target))
+        return command_list
+
 
 # Functions for helping users when incorrect usage is noticed
 def print_option():
@@ -153,15 +183,15 @@ def set_settings(argv, settings):
         elif i[0] == "-e":
             settings.add_exclusion(i[1])
         elif i[0] == "--titles":
-            settings.include_titles()
-        elif i[0] == "--std_filters":
+            settings.set_titles(True)
+        elif i[0] == "--std_filters": # Why did I do it like this instead of putting it in the actual class :)
             settings.add_exclusion("wiki/Category:")
             settings.add_exclusion("wiki/Help:")
             settings.add_exclusion("wiki/Template")
             settings.add_exclusion("wiki/Wikipedia:")
         elif i[0] == "--require":
             settings.add_requirement(i[1])
-        elif i[0] == "URL_Format":
+        elif i[0] == "--URL_Format":
             settings.set_url_format(i[1])
         elif i[0] == "--other_target":
             settings.set_target(i[1])
