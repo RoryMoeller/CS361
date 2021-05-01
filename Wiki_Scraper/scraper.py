@@ -1,6 +1,7 @@
 import getopt
 import requests
 import socket
+import flask
 from bs4 import BeautifulSoup
 from os import path, makedirs
 from sys import argv, stderr
@@ -71,16 +72,22 @@ class Settings:
     def set_titles(self, boolarg):
         self.titles = boolarg
     def add_exclusion(self, string):
-        self.exclusions.append(string)
+        if string not in self.exclusions:
+            self.exclusions.append(string)
+            return True
+        return False
     def add_requirement(self, string):
-        self.requirements.append(string)
+        if string not in self.requirements:
+            self.requirements.append(string)
+            return True
+        return False
     def set_target(self, string):
         lst = string.split(',')
         self.target[0] = lst[0]
         self.target[1] = lst[1]
     def set_save_location(self,string):
         self.save_image = string
-        if not path.exists(string):
+        if len(string) > 0 and not path.exists(string):
             makedirs(string)
             print("[+] Made directory named " + string, file=stderr)
     def validate(self):
@@ -96,9 +103,9 @@ class Settings:
                 print("[!] Warning: URL format should often be set to short when using other target\nContinuing...", file=stderr)
             if self.titles:
                 print("[!] Warning: Turning on titles may add unexpected text when using non-default target\nContinuing...", file=stderr)
-        if self.save_image and self.target != ["img","src"]:
-            print("[!] Cannot save images if target is not img,src", file=stderr)
-            return False
+        # if self.save_image and self.target != ["img","src"]:
+        #     print("[!] Cannot save images if target is not img,src", file=stderr)
+        #     return False
         return True
     def get_commandline(self):
         command_list = ["python", "Wiki_Scraper/scraper.py"]
@@ -233,9 +240,9 @@ def get_links(url, settings):
                     add_link = False
                     break
             if add_link:
-                if settings.save_image:
+                if settings.save_image and settings.target == ["img","src"]:
                     save_image_to_file(settings, attr_val)
-                if settings.url_format == "Full":
+                if settings.url_format == "Full" and attr_val[:2] != "//":
                     returner += "https://en.wikipedia.org"
                 try:
                     returner += attr_val
@@ -256,7 +263,7 @@ def save_image_to_file(settings, src):
     if src[:2] == "//":
         src = src[2:]
     if src[len(src)-4] != ".": # Avoid trying to save non-directly linked images
-        print("Skipping " + src, file=stderr)
+        # print("Skipping " + src, file=stderr)
         return
     if src[:5] != "http":
         src = "https://" + src
@@ -269,7 +276,33 @@ def save_image_to_file(settings, src):
     image_file.write(response.content) # Print to file
     image_file.close() # Done with file
 
-# Process continuous input/output from a socket connection
+# Process continuous input/output from HTTP requests. 
+def flaskified_sockets(settings):
+    app = flask.Flask(__name__)
+
+
+    @app.route("/saveimgs/<path:pagelink>", methods=["POST"])
+    def defaultpost(pagelink):
+        if len(settings.save_image) == 0:
+            return "Path not supplied to save image locations."
+        current_settings = settings
+        current_settings.set_target("img,src")
+        print(current_settings)
+        response = get_links(pagelink, current_settings)
+        return response
+
+    @app.route("/get/<path:pagelink>", methods=["GET"]) # Handle get requests
+    def index(pagelink):
+        original_target = settings.target
+        print(settings)
+        print("New connection", file=stderr)
+        print("Request:")
+        print(flask.request)
+        return get_links(pagelink, settings) + str(settings)
+
+    app.run(port=settings.socket_num)
+
+# Process continuous input/output from a socket connection. This was removed in favor of HTTP requests
 def socketings(settings):
     s = socket.socket()
     try:
@@ -302,7 +335,7 @@ def main(argv):
     if settings.socket_num == 0:
         cl_io(settings)
     else:
-        socketings(settings)
+        flaskified_sockets(settings)
 
 if __name__ == "__main__":
     main(argv)

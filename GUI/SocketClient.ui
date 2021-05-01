@@ -155,7 +155,7 @@
           <item>
            <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>Filters (One substring perr line)</string>
+             <string>Filters (One substring per line)</string>
             </property>
            </widget>
           </item>
