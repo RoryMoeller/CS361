@@ -14,6 +14,7 @@ class SocketWindow(qtw.QMainWindow):
         self.ui.setupUi(self) # Build the UI
         self.ui.server_button.clicked.connect(self.start_server) # Connect the button to the start server function
         self.user_settings = Scraper.Settings() # Give the window a set of Scraper settings
+        self.ui.statusbar.showMessage("Server is not started")
 
     def log_message(self, message):
         self.ui.logging_box.appendPlainText(message)
@@ -60,11 +61,14 @@ class SocketWindow(qtw.QMainWindow):
             # Scraper.socketings(self.user_settings) # This needs to be ran in separate thread !!!
             processholder = subprocess.Popen(self.user_settings.get_commandline(), shell=False)
             self.log_message("==Started a server on port " + str(self.user_settings.socket_num))
+            self.ui.statusbar.showMessage("Server is now running")
             qtw.QMessageBox.information(self, "Nice", "The server is now running in the background.\nPress \"Ok\" to stop the server")
             try:
                 processholder.kill() # hopefully this will actually kill the loop
+                self.ui.statusbar.showMessage("Server is now stopped")
                 self.log_message("==Killed server on port " + str(self.user_settings.socket_num))
             except:
+                self.ui.statusbar.showMessage("Server failed to die")
                 self.log_message("==Failed to kill server.")
             # thread1.join()
             # Kill the thread here !!!

@@ -292,12 +292,16 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(222, 222, 222);</string>
+   </property>
    <widget class="QMenu" name="menuFile">
     <property name="toolTip">
      <string/>
     </property>
     <property name="styleSheet">
-     <string notr="true">selection-background-color: rgb(195, 195, 195);</string>
+     <string notr="true">selection-background-color: rgb(195, 195, 195);
+color: rgb(0, 0, 0);</string>
     </property>
     <property name="title">
      <string>File</string>
@@ -312,7 +316,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit_Ctrl_Q">
    <property name="text">
-    <string>Exit (Ctrl+Q)</string>
+    <string>Exit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
