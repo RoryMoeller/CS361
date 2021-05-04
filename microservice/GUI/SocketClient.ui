@@ -101,7 +101,7 @@
                  <string extracomment="This is the socket that the server will listen for connections on"/>
                 </property>
                 <property name="text">
-                 <string>Socket Number:</string>
+                 <string>Port Number:</string>
                 </property>
                </widget>
               </item>
