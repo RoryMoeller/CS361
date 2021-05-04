@@ -67,7 +67,7 @@ class SocketWindow(qtw.QMainWindow):
             processholder = subprocess.Popen(self.user_settings.get_commandline(), shell=False)
             self.log_message("==Started a server on port " + str(self.user_settings.socket_num))
             self.ui.statusbar.showMessage("Server is now running")
-            qtw.QMessageBox.information(self, "Nice", "The server is now running in the background.\nPress \"Ok\" to stop the server")
+            qtw.QMessageBox.information(self, "Server now running on port " + str(self.user_settings.socket_num), "The server is now running in the background.\nPress \"Ok\" to stop the server")
             try:
                 processholder.kill() # hopefully this will actually kill the loop
                 self.ui.statusbar.showMessage("Server is now stopped")
