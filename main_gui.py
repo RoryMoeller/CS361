@@ -44,6 +44,11 @@ class SocketWindow(qtw.QMainWindow):
             if len(i) > 0:
                 if self.user_settings.add_exclusion(i):
                     self.log_message("Added " + i + " filter")
+        for i in self.ui.requirement_box.toPlainText().split("\n"): # add the user-made filters
+            i = i.strip() # pesky \r ! (i might not actually need this)
+            if len(i) > 0:
+                if self.user_settings.add_requirement(i):
+                    self.log_message("Added " + i + " requirement")
         if len(self.ui.save_images_box_3.text()) > 0:
             # self.user_settings.set_target("img,src") # 
             self.user_settings.set_save_location(self.ui.save_images_box_3.text())
