@@ -16,18 +16,18 @@ python3 scraper.py -i [link to wikipedia page] -o [output file name]
 ```
 #### An example CL IO script can be found [here](cltest.sh)
 ---
-### Socket IPC Version
-Supplying the I/O from a socket connection requires a specified port number. This is templated as:
+### HTTP Req IPC Version
+Supplying the I/O from a HTTP connection requires a specified port number. This is templated as:
 ```
 python3 scraper.py -s [port number]
 ```
 #### Do NOT supply the script with an exposed port.
-#### An example python3 socket IO script can be found [here](sockettest.py).
+#### An example python3 HTTP IO script can be found [here](httpreq.py).
 ---
 ## Common options
 |Option|Effect|
 ---|---
-`-s` [port] | Should run in socket mode & use the supplied port number
+`-s` [port] | Should run in HTTP IO mode & use the supplied port number
 `-o` [output file] | Should run in CL_IO mode & use the supplied filename as the output destination.
 `-i` [input URL] | Required when running in CL_IO mode. Uses the input url as the target
 `-d` [delimiter] | Use the supplied delimiter to separate the links.
@@ -54,7 +54,7 @@ Additional options are added for extended functionality
 This service can also be used to scrape non-anchor tags and non-href attributes by using `--other_target` and supplying the new target tag and attribute pair to scrape for. Note regarding this use case:
 > This can break the output formatting when used with other options. A warning will be issued when this is expected. Specifically, `--title` and `--URL_Format` are likely to be affected.
 ### Downloading images
-This service can also download images to a subdirectory of where the service is run from using the `--save_image` option. These images will not be communicated through either `-s`'s socket I/O or `-o`'s output file.
+This service can also download images to a subdirectory of where the service is run from using the `--save_image` option. These images will not be communicated through either `-s`'s HTTP I/O or `-o`'s output file.
 
 This example uses both non-anchor/href targets & downloading images. 
 ```
