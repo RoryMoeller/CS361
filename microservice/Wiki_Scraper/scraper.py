@@ -283,8 +283,11 @@ def flaskified_sockets(settings):
 
     @app.route("/saveimgs/<path:pagelink>", methods=["POST"])
     def defaultpost(pagelink):
-        if len(settings.save_image) == 0:
-            return "Path not supplied to save image locations."
+        try:
+            if len(settings.save_image) == 0:
+                return "Path not supplied to save image locations."
+        except TypeError:
+                return "Path not supplied to save image locations."
         current_settings = settings
         current_settings.set_target("img,src")
         print(current_settings)
@@ -298,7 +301,7 @@ def flaskified_sockets(settings):
         print("New connection", file=stderr)
         print("Request:")
         print(flask.request)
-        return get_links(pagelink, settings) + str(settings)
+        return get_links(pagelink, settings)
 
     app.run(port=settings.socket_num)
 
