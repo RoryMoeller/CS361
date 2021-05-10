@@ -39,7 +39,7 @@ class SettingsHistory():
         cp = setting
         if self.current_index == 19:  # if at end of settings array
             for i in range(len(self.possible_indexes) - 1):
-                self.settings_list[i] = self.settings_list[i+1]
+                self.settings_list[i] = self.settings_list[i + 1]
             self.settings_list[19].save_input = cp.save_input
             self.settings_list[19].save_plain = cp.save_plain
             self.settings_list[19].save_enc = cp.save_enc

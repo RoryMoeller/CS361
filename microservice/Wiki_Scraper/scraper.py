@@ -20,6 +20,8 @@ from sys import argv, stderr
 # --save_image [subfolder to save images in]
 
 # Class for handling, setting & validating the various settings that can be passed when running the file
+
+
 class Settings:
     def __init__(self):
         self.input_url = False
@@ -29,9 +31,10 @@ class Settings:
         self.save_image = False
         self.url_format = "Short"
         self.delimiter = '\n'
-        self.target = ["a","href"]
+        self.target = ["a", "href"]
         self.requirements = []
         self.exclusions = []
+
     def __str__(self):
         return \
             "input_url = " + str(self.input_url) +\
@@ -45,60 +48,70 @@ class Settings:
             "\ntarget tag = " + str(self.target[0]) + \
             "\ntarget attribute = " + str(self.target[1]) +\
             "\nsave image location = " + str(self.save_image)
+
     def set_input_url(self, url):
         if self.socket_num:
             print("Cannot set input URL when using socket I/O", file=stderr)
             exit(1)
         self.input_url = url
+
     def set_output_file(self, output):
         if self.socket_num:
             print("Cannot set output file when using socket I/O", file=stderr)
             exit(1)
         self.output_file = output
+
     def set_socket_num(self, num):
         if self.input_url or self.output_file:
             print("Cannot use socket I/O with other I/O methods", file=stderr)
             exit(1)
         else:
             self.socket_num = num
+
     def set_delimiter(self, string):
         self.delimiter = string
+
     def set_url_format(self, urlformat):
         if urlformat not in ["Short", "Full"]:
             print("Invalid URL Format. Valid inputs are \"Short\" and \"Full\"", file=stderr)
             exit(1)
         else:
             self.url_format = urlformat
+
     def set_titles(self, boolarg):
         self.titles = boolarg
+
     def add_exclusion(self, string):
         if string not in self.exclusions:
             self.exclusions.append(string)
             return True
         return False
+
     def add_requirement(self, string):
         if string not in self.requirements:
             self.requirements.append(string)
             return True
         return False
+
     def set_target(self, string):
         lst = string.split(',')
         self.target[0] = lst[0]
         self.target[1] = lst[1]
-    def set_save_location(self,string):
+
+    def set_save_location(self, string):
         self.save_image = string
         if len(string) > 0 and not path.exists(string):
             makedirs(string)
             print("[+] Made directory named " + string, file=stderr)
+
     def validate(self):
-    
-        if ( self.socket_num ) or ( self.output_file and self.input_url ):
+        if (self.socket_num) or (self.output_file and self.input_url):
             pass
         else:
             print("[!] Invalid options set.\nMake sure one I/O method is set.\nIf not using sockets, ensure both an input URL and an output file are set.\nCurrent settings:", file=stderr)
             print(self, file=stderr)
             return False
-        if self.target != ['a',"href"]:
+        if self.target != ['a', "href"]:
             if self.url_format != "Short":
                 print("[!] Warning: URL format should often be set to short when using other target\nContinuing...", file=stderr)
             if self.titles:
@@ -107,10 +120,11 @@ class Settings:
         #     print("[!] Cannot save images if target is not img,src", file=stderr)
         #     return False
         return True
+
     def get_commandline(self):
         command_list = ["python", "Wiki_Scraper/scraper.py"]
         if self.input_url:
-            command_list.append( "-i") 
+            command_list.append("-i")
             command_list.append(str(self.input_url))
         if self.output_file:
             command_list.append("-o")
@@ -152,6 +166,8 @@ def print_option():
     --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
     --other_target [tag,attribute] \n\
     --save_image [subfolder]", file=stderr)
+
+
 def print_options(problem):
     print(problem, file=stderr)
     print("Valid options are: \n\
@@ -166,6 +182,7 @@ def print_options(problem):
     --std_filters (adds a set of common internal links to non-article pages to the exclusion list) \n\
     --other_target [tag,attribute] \n\
     --save_image [subfolder]", file=stderr)
+
 
 # Take settings out of argv and put them into a Settings object
 def set_settings(argv, settings):
@@ -191,7 +208,7 @@ def set_settings(argv, settings):
             settings.add_exclusion(i[1])
         elif i[0] == "--titles":
             settings.set_titles(True)
-        elif i[0] == "--std_filters": # Why did I do it like this instead of putting it in the actual class :)
+        elif i[0] == "--std_filters":  # Why did I do it like this instead of putting it in the actual class :)
             settings.add_exclusion("wiki/Category:")
             settings.add_exclusion("wiki/Help:")
             settings.add_exclusion("wiki/Template")
@@ -204,11 +221,11 @@ def set_settings(argv, settings):
             settings.set_target(i[1])
         elif i[0] == "--save_image":
             settings.set_save_location(i[1])
-        
     if len(otherargs) > 0:
         print("[!] Warning:\tIgnoring the following args:", file=stderr)
         for i in otherargs:
             print("\t" + i, file=stderr)
+
 
 # Validate links as internal
 def valid_link(attribute_value):
@@ -216,6 +233,7 @@ def valid_link(attribute_value):
         return False
     else:
         return True
+
 
 # Return a long string of all the links
 def get_links(url, settings):
@@ -227,9 +245,9 @@ def get_links(url, settings):
     all_links = body.find_all(settings.target[0])
     for i in all_links:
         attr_val = i.get(settings.target[1])
-        if ( valid_link(attr_val) and len(str(i.get_text())) > 0 ) or settings.target != ['a',"href"]:
+        if (valid_link(attr_val) and len(str(i.get_text())) > 0) or settings.target != ['a', "href"]:
             add_link = True
-            if attr_val == None:
+            if attr_val is None:
                 add_link = False
             for j in settings.exclusions:
                 if add_link and j in attr_val:
@@ -240,18 +258,19 @@ def get_links(url, settings):
                     add_link = False
                     break
             if add_link:
-                if settings.save_image and settings.target == ["img","src"]:
+                if settings.save_image and settings.target == ["img", "src"]:
                     save_image_to_file(settings, attr_val)
                 if settings.url_format == "Full" and attr_val[:2] != "//":
                     returner += "https://en.wikipedia.org"
                 try:
                     returner += attr_val
-                except TypeError: # This should be caught by checking attr_val == None. 
-                    print("[!] Warning: Fetched invalid data from attribute.", file=stderr) 
+                except TypeError:  # This should be caught by checking attr_val is None.
+                    print("[!] Warning: Fetched invalid data from attribute.", file=stderr)
                 if settings.titles:
                     returner += ("\n\t" + i.get_text())
                 returner += settings.delimiter
     return returner
+
 
 # Process input/output from the commandline parameters
 def cl_io(settings):
@@ -259,27 +278,28 @@ def cl_io(settings):
     links = get_links(settings.input_url, settings)
     output.write(links)
 
+
 def save_image_to_file(settings, src):
     if src[:2] == "//":
         src = src[2:]
-    if src[len(src)-4] != ".": # Avoid trying to save non-directly linked images
+    if src[len(src) - 4] != ".":  # Avoid trying to save non-directly linked images
         # print("Skipping " + src, file=stderr)
         return
     if src[:5] != "http":
         src = "https://" + src
     file_name = settings.save_image
-    pos = src.rfind("/") # Should capture position of last /
-    file_name += src[pos:] # Appends the file name from wikipedia
+    pos = src.rfind("/")  # Should capture position of last /
+    file_name += src[pos:]  # Appends the file name from wikipedia
     print("Saving image to " + file_name, file=stderr)
-    image_file = open(file_name, 'wb') # Create the file
-    response = requests.get(url=src) # Get the image
-    image_file.write(response.content) # Print to file
-    image_file.close() # Done with file
+    image_file = open(file_name, 'wb')  # Create the file
+    response = requests.get(url=src)  # Get the image
+    image_file.write(response.content)  # Print to file
+    image_file.close()  # Done with file
 
-# Process continuous input/output from HTTP requests. 
+
+# Process continuous input/output from HTTP requests.
 def flaskified_sockets(settings):
     app = flask.Flask(__name__)
-
 
     @app.route("/saveimgs/<path:pagelink>", methods=["POST"])
     def defaultpost(pagelink):
@@ -287,16 +307,15 @@ def flaskified_sockets(settings):
             if len(settings.save_image) == 0:
                 return "Path not supplied to save image locations."
         except TypeError:
-                return "Path not supplied to save image locations."
+            return "Path not supplied to save image locations."
         current_settings = settings
         current_settings.set_target("img,src")
         print(current_settings)
         response = get_links(pagelink, current_settings)
         return response
 
-    @app.route("/get/<path:pagelink>", methods=["GET"]) # Handle get requests
+    @app.route("/get/<path:pagelink>", methods=["GET"])  # Handle get requests
     def index(pagelink):
-        original_target = settings.target
         print(settings)
         print("New connection", file=stderr)
         print("Request:")
@@ -304,6 +323,7 @@ def flaskified_sockets(settings):
         return get_links(pagelink, settings)
 
     app.run(port=settings.socket_num)
+
 
 # Process continuous input/output from a socket connection. This was removed in favor of HTTP requests
 def socketings(settings):
@@ -318,7 +338,7 @@ def socketings(settings):
     while 1:
         connection, address = s.accept()
         print("connected", address, file=stderr)
-        req = connection.recv(1024).decode() # what to do about size limit...
+        req = connection.recv(1024).decode()  # what to do about size limit...
         if len(req) > 100:
             connection.send("Length of request is too long".encode())
             connection.close()
@@ -327,6 +347,7 @@ def socketings(settings):
             links = get_links(req, settings)
             connection.send(links.encode())
             connection.close()
+
 
 # Set & validate settings. Run appropriate I/O mode function
 def main(argv):
@@ -339,6 +360,7 @@ def main(argv):
         cl_io(settings)
     else:
         flaskified_sockets(settings)
+
 
 if __name__ == "__main__":
     main(argv)
