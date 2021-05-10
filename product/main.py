@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import re
 import base64
 from os import path, makedirs
+from sys import stderr
 
 class CiphertextGeneratorSettings():
     def __init__(self):
@@ -52,12 +53,12 @@ class SettingsHistory():
             while i < len(self.possible_indexes):
                 self.possible_indexes[i] = False # Unset redo history after making a change
                 i += 1
-        print("ADDING", setting)
+        # print("ADDING", setting)
     def get_previous_setting(self):
         if self.current_index < 1:
             return 0 # Cannot get previous if there is no previous
         self.current_index -= 1
-        print("Returning ", self.settings_list[self.current_index])
+        # print("Returning ", self.settings_list[self.current_index])
         return self.settings_list[self.current_index]
     def get_next_setting(self):
         if self.current_index == 19:
@@ -65,9 +66,9 @@ class SettingsHistory():
             return 0
         if self.possible_indexes[self.current_index + 1]: # If the next index is available
             self.current_index += 1
-            print("Returning ", self.settings_list[self.current_index])
+            # print("Returning ", self.settings_list[self.current_index])
             return self.settings_list[self.current_index]
-        print("Set to False")
+        # print("Set to False")
         return 0
     def __str__(self):
         l1 = ""
@@ -128,22 +129,25 @@ class M_Window(qtw.QMainWindow):
             return
         if self.settings.save_enc or self.settings.save_plain:
             wc = self.get_wordcloud()
-            if self.settings.save_plain:
-                file = open("".join(self.settings.word_list) + "_plain.png", "wb")
-                file.write(wc)
-                file.close()
-                self.log_message("Saved the plain .png file: " + "".join(self.settings.word_list) + "_plain.png")
-            if self.settings.save_enc:
-                self.log_message("Saving encrypted files not supported yet")
+            if wc != 0:
+                if self.settings.save_plain:
+                    file = open(self.settings.save_subdir + "/" + "".join(self.settings.word_list) + "_plain.png", "wb")
+                    file.write(wc)
+                    file.close()
+                    self.log_message("Saved the plain .png file: " + "".join(self.settings.word_list) + "_plain.png")
+                if self.settings.save_enc:
+                    self.log_message("Saving encrypted files not supported yet")
+            else:
+                self.log_message("Abandoned saving unrecieved data")
         if self.settings.save_input:
-            with open("".join(self.settings.word_list) + "_input.txt", "w") as file:
+            with open(self.settings.save_subdir + "/" + "".join(self.settings.word_list) + "_input.txt", "w") as file:
                 file.write(" ".join(self.settings.word_list))
             self.log_message("Saved the input .txt file: " + "".join(self.settings.word_list) + "_input.txt")
 
     def close_app(self):
-        print(self.setting_history)
+        # print(self.setting_history)
+        exit(0)
 
-        # exit(0)
     def undo_act(self):
         prev_set = self.setting_history.get_previous_setting()
         if prev_set == 0:
@@ -159,7 +163,7 @@ class M_Window(qtw.QMainWindow):
             return
         self.settings = next_set
         self.equate_settings()
-        self.log_message("Undid last undo")
+        self.log_message("Redid last undo")
 
 
         # self.log_message(wc)
@@ -167,9 +171,16 @@ class M_Window(qtw.QMainWindow):
         data= {
             'text': " ".join(self.settings.word_list)
         }
-        res = requests.post("https://word-cloud-leungd.wn.r.appspot.com/", data=data)
+        res = requests.post("https://word-cloud-leungd.wn.r.appspot.com/cloud", json=data)
         # print(re.findall(string=res.text, pattern="<img src=.*alt=\"\">")[0])
-        return base64.b64decode(re.findall(string=res.text, pattern="<img src=.*alt=\"\">")[0][32:]) # First 32 chars are tag & meta garb dont care about 
+        # print(res.text, file=stderr)
+        try:
+            # return base64.b64decode(re.findall(string=res.text, pattern="<img src=.*alt=\"\">")[0][32:]) # First 32 chars are tag & meta garb dont care about 
+            # return base64.b64decode(res.json()['image'][21:])
+            return base64.b64decode(res.text[31:-2])
+        except IndexError:
+            self.log_message("Unexpected response from wordcloud microservice")
+            return 0
 
     def log_message(self, message):
         self.ui.response_log.appendPlainText(message)
@@ -180,7 +191,7 @@ class M_Window(qtw.QMainWindow):
         self.settings.save_subdir = self.ui.subfolder_dir.text()
         self.settings.word_list = self.ui.word_list.toPlainText().split()
         self.setting_history.add_settings_set(self.settings)
-        self.log_message(str(self.settings))
+        # self.log_message(str(self.settings))
     def equate_settings(self): #Update the UI to match the current self.settings 
         self.ui.save_input_txt.setChecked(self.settings.save_input)
         self.ui.save_plain_png.setChecked(self.settings.save_plain)
