@@ -15,6 +15,10 @@ class SocketWindow(qtw.QMainWindow):
         self.ui.server_button.clicked.connect(self.start_server)  # Connect the button to the start server function
         self.user_settings = Scraper.Settings()  # Give the window a set of Scraper settings
         self.ui.statusbar.showMessage("Server is not started")
+        self.ui.actionExit.triggered.connect(self.close_app)
+
+    def close_app(self):
+        exit(0)
 
     def log_message(self, message):
         self.ui.logging_box.appendPlainText(message)

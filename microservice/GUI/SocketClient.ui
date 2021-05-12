@@ -289,7 +289,7 @@
      <x>0</x>
      <y>0</y>
      <width>867</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -309,12 +309,12 @@ color: rgb(0, 0, 0);</string>
     <property name="toolTipsVisible">
      <bool>false</bool>
     </property>
-    <addaction name="actionExit_Ctrl_Q"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionExit_Ctrl_Q">
+  <action name="actionExit">
    <property name="text">
     <string>Exit</string>
    </property>
