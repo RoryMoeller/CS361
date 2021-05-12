@@ -229,6 +229,9 @@
      </item>
      <item>
       <widget class="QPlainTextEdit" name="word_list">
+       <property name="tabChangesFocus">
+        <bool>true</bool>
+       </property>
        <property name="readOnly">
         <bool>false</bool>
        </property>
@@ -350,10 +353,21 @@
   </action>
  </widget>
  <tabstops>
+  <tabstop>save_plain_png</tabstop>
+  <tabstop>save_enc_png</tabstop>
+  <tabstop>save_input_txt</tabstop>
   <tabstop>subfolder_dir</tabstop>
+  <tabstop>color_set_1</tabstop>
+  <tabstop>color_set_2</tabstop>
+  <tabstop>color_set_3</tabstop>
+  <tabstop>font_size</tabstop>
   <tabstop>word_list</tabstop>
   <tabstop>save_files_button</tabstop>
   <tabstop>response_log</tabstop>
+  <tabstop>radioButton_6</tabstop>
+  <tabstop>radioButton_4</tabstop>
+  <tabstop>radioButton_5</tabstop>
+  <tabstop>socket_box_3</tabstop>
  </tabstops>
  <resources/>
  <connections/>
