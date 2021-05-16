@@ -13,6 +13,8 @@ class CiphertextGeneratorSettings():
         self.save_input = False
         self.save_plain = False
         self.save_enc = False
+        self.font_size = 1
+        self.color_set = 0
         self.save_subdir = ""
         self.word_list = []
 
@@ -21,6 +23,8 @@ class CiphertextGeneratorSettings():
         res += "save input: " + str(self.save_input)
         res += "\nsave plain: " + str(self.save_plain)
         res += "\nsave enc: " + str(self.save_enc)
+        res += "\nfont size: " + str(self.font_size)
+        res += "\ncolor set: " + str(self.color_set)
         res += "\nsave dir: " + self.save_subdir
         res += "\nwordlist: " + str(self.word_list)
         return res
@@ -32,7 +36,7 @@ class SettingsHistory():
         self.possible_indexes[0] = True  # First (current) is accessible
         self.current_index = 0
         self.settings_list = []
-        for i in range(20):
+        for _ in range(20):
             self.settings_list.append(CiphertextGeneratorSettings())
 
     def add_settings_set(self, setting):
@@ -44,6 +48,8 @@ class SettingsHistory():
             self.settings_list[19].save_plain = cp.save_plain
             self.settings_list[19].save_enc = cp.save_enc
             self.settings_list[19].save_subdir = cp.save_subdir
+            self.settings_list[19].color_set = cp.color_set
+            self.settings_list[19].font_size = cp.font_size
             self.settings_list[19].word_list = cp.word_list
         else:
             self.current_index += 1  # advance pointer to current
@@ -51,6 +57,8 @@ class SettingsHistory():
             self.settings_list[self.current_index].save_plain = cp.save_plain
             self.settings_list[self.current_index].save_enc = cp.save_enc
             self.settings_list[self.current_index].save_subdir = cp.save_subdir
+            self.settings_list[self.current_index].color_set = cp.color_set
+            self.settings_list[self.current_index].font_size = cp.font_size
             self.settings_list[self.current_index].word_list = cp.word_list
             self.possible_indexes[self.current_index] = True
             i = self.current_index + 1
@@ -199,6 +207,13 @@ class M_Window(qtw.QMainWindow):
         self.settings.save_plain = self.ui.save_plain_png.isChecked()
         self.settings.save_enc = self.ui.save_enc_png.isChecked()
         self.settings.save_subdir = self.ui.subfolder_dir.text()
+        self.settings.font_size = self.ui.font_size.value()
+        if self.ui.color_set_1.isChecked():
+            self.settings.color_set = 0
+        elif self.ui.color_set_2.isChecked():
+            self.settings.color_set = 1
+        else:
+            self.settings.color_set = 2
         self.settings.word_list = self.ui.word_list.toPlainText().split()
         self.setting_history.add_settings_set(self.settings)
         # self.log_message(str(self.settings))
@@ -207,7 +222,14 @@ class M_Window(qtw.QMainWindow):
         self.ui.save_input_txt.setChecked(self.settings.save_input)
         self.ui.save_plain_png.setChecked(self.settings.save_plain)
         self.ui.save_enc_png.setChecked(self.settings.save_enc)
+        self.ui.font_size.setValue(self.settings.font_size)
         self.ui.subfolder_dir.setText(self.settings.save_subdir)
+        if self.settings.color_set == 0:
+            self.ui.color_set_1.setChecked(True)
+        elif self.settings.color_set == 1:
+            self.ui.color_set_2.setChecked(True)
+        else:
+            self.ui.color_set_3.setChecked(True)
 
 
 if __name__ == "__main__":
