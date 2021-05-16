@@ -307,7 +307,7 @@
      <x>0</x>
      <y>0</y>
      <width>435</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -364,10 +364,6 @@
   <tabstop>word_list</tabstop>
   <tabstop>save_files_button</tabstop>
   <tabstop>response_log</tabstop>
-  <tabstop>radioButton_6</tabstop>
-  <tabstop>radioButton_4</tabstop>
-  <tabstop>radioButton_5</tabstop>
-  <tabstop>socket_box_3</tabstop>
  </tabstops>
  <resources/>
  <connections/>
