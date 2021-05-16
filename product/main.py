@@ -184,8 +184,8 @@ class M_Window(qtw.QMainWindow):
     def get_wordcloud(self):
         data = {
             'text': " ".join(self.settings.word_list),
-            'size': '2',
-            'color': '0'
+            'size': str(self.settings.font_size),
+            'color': str(self.settings.color_set)
         }
         res = requests.post("https://word-cloud-leungd.wn.r.appspot.com/cloud", json=data)
         # print(re.findall(string=res.text, pattern="<img src=.*alt=\"\">")[0])
