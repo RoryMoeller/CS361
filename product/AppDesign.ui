@@ -49,13 +49,20 @@
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QLabel" name="label_5">
+            <property name="statusTip">
+             <string>Required. A relative path to a subfolder where the saved files will be located</string>
+            </property>
             <property name="text">
              <string>Subfolder To Save to:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="subfolder_dir"/>
+           <widget class="QLineEdit" name="subfolder_dir">
+            <property name="statusTip">
+             <string>Required. A relative path to a subfolder where the saved files will be located</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -77,6 +84,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QCheckBox" name="save_plain_png">
+            <property name="statusTip">
+             <string>Save a copy of the generated wordcloud PNG image</string>
+            </property>
             <property name="text">
              <string>Save plain .png</string>
             </property>
@@ -84,6 +94,9 @@
           </item>
           <item>
            <widget class="QCheckBox" name="save_enc_png">
+            <property name="statusTip">
+             <string>Save a copy of the encrypted wordcloud PNG image</string>
+            </property>
             <property name="text">
              <string>Save encrypted .png</string>
             </property>
@@ -91,6 +104,9 @@
           </item>
           <item>
            <widget class="QCheckBox" name="save_input_txt">
+            <property name="statusTip">
+             <string>Save the input text from the list of words</string>
+            </property>
             <property name="text">
              <string>Save input .txt</string>
             </property>
@@ -113,6 +129,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="color_set_1">
+                <property name="statusTip">
+                 <string>The wordcloud image should use color style set 1</string>
+                </property>
                 <property name="text">
                  <string>Set 1</string>
                 </property>
@@ -120,6 +139,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="color_set_2">
+                <property name="statusTip">
+                 <string>The wordcloud image should use color style set 2</string>
+                </property>
                 <property name="text">
                  <string>Set 2</string>
                 </property>
@@ -127,6 +149,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="color_set_3">
+                <property name="statusTip">
+                 <string>The wordcloud image should use color style set 3</string>
+                </property>
                 <property name="text">
                  <string>Set 3</string>
                 </property>
@@ -157,6 +182,9 @@
               </item>
               <item>
                <widget class="QSpinBox" name="font_size">
+                <property name="statusTip">
+                 <string>The size of font the wordcloud image should use.</string>
+                </property>
                 <property name="styleSheet">
                  <string notr="true">background-color: rgb(255, 255, 255);</string>
                 </property>
