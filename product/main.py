@@ -153,16 +153,16 @@ class M_Window(qtw.QMainWindow):
         # self.update_settings()
         self.settings.word_list = self.ui.word_list.toPlainText().split()
         self.settings.save_subdir = self.ui.subfolder_dir.text()
-
+        self.log_message("Started saving process...")
         if (self.settings.save_subdir == ""):
-            self.log_message("No provided subdirectory to save to. Cancelling...")
+            self.log_message("Fatal Error: No provided subdirectory to save files to. Please supply a folder name to \"Subfolder To Save to\" in Save Options ...")
             return
         else:
             if not path.exists(self.settings.save_subdir):
                 makedirs(self.settings.save_subdir)
                 self.log_message("Made subdirectory: " + self.settings.save_subdir)
         if not (self.settings.save_plain or self.settings.save_input or self.settings.save_enc):
-            self.log_message("There is nothing to save.")
+            self.log_message("Cancelling: there is nothing to save. Please select at least one of the file types to save in Save Options...")
             return
         if self.settings.save_enc or self.settings.save_plain:
             wc = self.get_wordcloud()
@@ -175,7 +175,7 @@ class M_Window(qtw.QMainWindow):
                 if self.settings.save_enc:
                     self.log_message("Saving encrypted files not supported yet")
             else:
-                self.log_message("Abandoned saving unrecieved data")
+                self.log_message("Internal Error: Recieved wordcloud is empty. Abandoned saving unrecieved data.")
         if self.settings.save_input:
             with open(self.settings.save_subdir + "/" + "".join(self.settings.word_list) + "_input.txt", "w") as file:
                 file.write(" ".join(self.settings.word_list))
@@ -219,11 +219,12 @@ class M_Window(qtw.QMainWindow):
             # return base64.b64decode(res.json()['image'][21:])
             return base64.b64decode(res.text[31:-2])
         except IndexError:
-            self.log_message("Unexpected response from wordcloud microservice")
+            self.log_message("Internal Error: unexpected response from wordcloud microservice")
             return 0
 
     def log_message(self, message):
         self.ui.response_log.appendPlainText(message)
+        self.repaint()  # It took hours to find this function. It's neat.
 
     def update_settings(self):
         self.settings.save_input = self.ui.save_input_txt.isChecked()
