@@ -2,7 +2,10 @@ from design import Ui_MainWindow
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtGui as qtg
 from pathlib import Path
-import sys
+try:
+    from sys import _MEIPASS
+except ImportError:
+    _MEIPASS = None
 import requests
 # from bs4 import BeautifulSoup
 # import re
@@ -135,9 +138,9 @@ class M_Window(qtw.QMainWindow):
         MainWindow.setWindowIcon(icon)
         """
         try:
-            bundle = Path(sys._MEIPASS)  # Temp dir where executable stuff is
+            bundle = Path(_MEIPASS)  # Temp dir where executable stuff is
             path = str(bundle) + "\\icon.ico"  # Path to icon file from the temp dir
-        except AttributeError:
+        except TypeError:
             path = str(Path.cwd())
             path += "\\icon.ico"
 
