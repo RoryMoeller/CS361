@@ -1,5 +1,8 @@
 from design import Ui_MainWindow
 from PyQt5 import QtWidgets as qtw
+from PyQt5 import QtGui as qtg
+from pathlib import Path
+import sys
 import requests
 # from bs4 import BeautifulSoup
 # import re
@@ -125,6 +128,23 @@ class M_Window(qtw.QMainWindow):
         self.ui.save_input_txt.clicked.connect(self.update_settings)
         self.ui.save_plain_png.clicked.connect(self.update_settings)
         self.ui.save_enc_png.clicked.connect(self.update_settings)
+
+        """ # From design.py default icon setting
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
+        """
+        try:
+            bundle = Path(sys._MEIPASS)  # Temp dir where executable stuff is
+            path = str(bundle) + "\\icon.ico"  # Path to icon file from the temp dir
+        except AttributeError:
+            path = str(Path.cwd())
+            path += "\\icon.ico"
+
+        # self.log_message(path)
+        icon = qtg.QIcon()
+        icon.addPixmap(qtg.QPixmap(path), qtg.QIcon.Normal, qtg.QIcon.Off)
+        self.setWindowIcon(icon)
 
     def save_button(self):
         # self.update_settings()
