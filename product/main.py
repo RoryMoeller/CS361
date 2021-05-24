@@ -221,6 +221,9 @@ class M_Window(qtw.QMainWindow):
         except IndexError:
             self.log_message("Internal Error: unexpected response from wordcloud microservice")
             return 0
+        except base64.binascii.Error:
+            self.log_message("Internal Error: unexpected response from wordcloud microservice")
+            return 0
 
     def log_message(self, message):
         self.ui.response_log.appendPlainText(message)
