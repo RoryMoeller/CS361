@@ -85,5 +85,4 @@ if __name__ == "__main__":
     app = qtw.QApplication([])
     window = SocketWindow()
     window.show()
-
     app.exec_()

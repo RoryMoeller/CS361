@@ -91,7 +91,6 @@ class M_Window(qtw.QMainWindow):
         self.ui.save_plain_png.clicked.connect(self.update_settings)
         self.ui.save_enc_png.clicked.connect(self.update_settings)
 
-
     def set_icon(self):
         try:
             bundle = Path(_MEIPASS)  # Temp dir where executable stuff is
