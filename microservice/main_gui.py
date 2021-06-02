@@ -3,7 +3,6 @@ import Wiki_Scraper.scraper as Scraper
 import subprocess
 from sys import stderr
 from PyQt5 import QtWidgets as qtw
-# from PyQt5 import QtCore as qtc, QtGui
 
 
 class SocketWindow(qtw.QMainWindow):
@@ -44,17 +43,16 @@ class SocketWindow(qtw.QMainWindow):
             if self.user_settings.add_exclusion("wiki/Wikipedia:"):
                 self.log_message("Added wiki/Wikipedia: filter")
         for i in self.ui.filters_box.toPlainText().split("\n"):  # add the user-made filters
-            i = i.strip()  # pesky \r ! (i might not actually need this)
+            i = i.strip()
             if len(i) > 0:
                 if self.user_settings.add_exclusion(i):
                     self.log_message("Added " + i + " filter")
         for i in self.ui.requirement_box.toPlainText().split("\n"):  # add the user-made filters
-            i = i.strip()  # pesky \r ! (i might not actually need this)
+            i = i.strip()
             if len(i) > 0:
                 if self.user_settings.add_requirement(i):
                     self.log_message("Added " + i + " requirement")
         if len(self.ui.save_images_box_3.text()) > 0:
-            # self.user_settings.set_target("img,src")
             self.user_settings.set_save_location(self.ui.save_images_box_3.text())
             self.log_message("Saving to subfolder " + self.ui.save_images_box_3.text())
         else:
@@ -63,24 +61,22 @@ class SocketWindow(qtw.QMainWindow):
         self.log_message("Updated the settings")
 
     def start_server(self):
-        # print("This is not a thing yet :)")
         self.update_settings()
         print(self.user_settings.get_commandline(), file=stderr)
         if self.user_settings.validate():
-            # Scraper.socketings(self.user_settings) # This needs to be ran in separate thread !!!
             processholder = subprocess.Popen(self.user_settings.get_commandline(), shell=False)
             self.log_message("==Started a server on port " + str(self.user_settings.socket_num))
             self.ui.statusbar.showMessage("Server is now running")
-            qtw.QMessageBox.information(self, "Server now running on port " + str(self.user_settings.socket_num), "The server is now running in the background.\nPress \"Ok\" to stop the server")
+            qtw.QMessageBox.information(self, "Server now running on port " + \
+                str(self.user_settings.socket_num), "The server is now running in the background. \
+                \nPress \"Ok\"to stop the server")
             try:
                 processholder.kill()  # hopefully this will actually kill the loop
                 self.ui.statusbar.showMessage("Server is now stopped")
                 self.log_message("==Killed server on port " + str(self.user_settings.socket_num))
-            except:  # Should not encounter anymore with subprocess.Popen
+            except OSError:  # Should not encounter anymore with subprocess.Popen
                 self.ui.statusbar.showMessage("Server failed to die")
                 self.log_message("==Failed to kill server.")
-            # thread1.join()
-            # Kill the thread here !!!
         else:
             qtw.QMessageBox.critical(self, "Invalid settings!", "Double check your settings!")
 
