@@ -7,11 +7,13 @@ try:
 except (IndexError, ValueError):
     print("Supply the port (as an integer) to test on")
     exit(1)
-s.send("https://en.wikipedia.org/wiki/System".encode()) # .encode takes the URL string and turns it into a bytes object
-res = "" 
+
+
+s.send("https://en.wikipedia.org/wiki/System".encode())  # .encode takes the URL string and turns it into a bytes object
+res = ""
 while 1:
-    block = s.recv(1024) # recieve in blocks of 1024 bytes
-    if not block: # if the connection is closed
+    block = s.recv(1024)  # recieve in blocks of 1024 bytes
+    if not block:  # if the connection is closed
         break
-    res += block.decode() # append the string representation of current block
+    res += block.decode()  # append the string representation of current block
 print(res)
