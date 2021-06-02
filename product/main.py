@@ -7,11 +7,8 @@ try:
 except ImportError:
     _MEIPASS = None
 import requests
-# from bs4 import BeautifulSoup
-# import re
 import base64
 from os import path, makedirs
-# from sys import stderr
 
 
 class CiphertextGeneratorSettings():
@@ -76,18 +73,14 @@ class SettingsHistory():
         if self.current_index < 1:
             return 0  # Cannot get previous if there is no previous
         self.current_index -= 1
-        # print("Returning ", self.settings_list[self.current_index])
         return self.settings_list[self.current_index]
 
     def get_next_setting(self):
         if self.current_index == 19:
-            print("At end")
             return 0
         if self.possible_indexes[self.current_index + 1]:  # If the next index is available
             self.current_index += 1
-            # print("Returning ", self.settings_list[self.current_index])
             return self.settings_list[self.current_index]
-        # print("Set to False")
         return 0
 
     def __str__(self):
@@ -112,7 +105,7 @@ class SettingsHistory():
                 l2 += " ^  "
             else:
                 l2 += "    "
-        return (l1 + l2)
+        return l1 + l2
 
 
 class M_Window(qtw.QMainWindow):
@@ -120,6 +113,7 @@ class M_Window(qtw.QMainWindow):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.set_icon()
         self.settings = CiphertextGeneratorSettings()
         self.ui.save_files_button.clicked.connect(self.save_button)
         self.ui.actionQuit.triggered.connect(self.close_app)
@@ -132,25 +126,20 @@ class M_Window(qtw.QMainWindow):
         self.ui.save_plain_png.clicked.connect(self.update_settings)
         self.ui.save_enc_png.clicked.connect(self.update_settings)
 
-        """ # From design.py default icon setting
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("icon.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        MainWindow.setWindowIcon(icon)
-        """
+
+    def set_icon(self):
         try:
             bundle = Path(_MEIPASS)  # Temp dir where executable stuff is
             path = str(bundle) + "\\icon.ico"  # Path to icon file from the temp dir
         except TypeError:
+            # Currently breaks if ran from parent directory. Need fix.
             path = str(Path.cwd())
             path += "\\icon.ico"
-
-        # self.log_message(path)
         icon = qtg.QIcon()
         icon.addPixmap(qtg.QPixmap(path), qtg.QIcon.Normal, qtg.QIcon.Off)
         self.setWindowIcon(icon)
 
     def save_button(self):
-        # self.update_settings()
         self.settings.word_list = self.ui.word_list.toPlainText().split()
         self.settings.save_subdir = self.ui.subfolder_dir.text()
         self.log_message("Started saving process...")
@@ -202,7 +191,6 @@ class M_Window(qtw.QMainWindow):
         self.settings = next_set
         self.equate_settings()
         self.log_message("Redid last undo")
-        # self.log_message(wc)
 
     def get_wordcloud(self):
         data = {
@@ -211,12 +199,7 @@ class M_Window(qtw.QMainWindow):
             'color': str(self.settings.color_set)
         }
         res = requests.post("https://word-cloud-leungd.wn.r.appspot.com/cloud", json=data)
-        # print(re.findall(string=res.text, pattern="<img src=.*alt=\"\">")[0])
-        # print(res.text, file=stderr)
         try:
-            # return base64.b64decode(re.findall(string=res.text, pattern="<img src=.*alt=\"\">")[0][32:])
-            # First 32 chars are tag & meta garb dont care about
-            # return base64.b64decode(res.json()['image'][21:])
             return base64.b64decode(res.text[31:-2])
         except IndexError:
             self.log_message("Internal Error: unexpected response from wordcloud microservice")
@@ -243,7 +226,6 @@ class M_Window(qtw.QMainWindow):
             self.settings.color_set = 2
         self.settings.word_list = self.ui.word_list.toPlainText().split()
         self.setting_history.add_settings_set(self.settings)
-        # self.log_message(str(self.settings))
 
     def equate_settings(self):  # Update the UI to match the current self.settings
         self.ui.save_input_txt.setChecked(self.settings.save_input)
