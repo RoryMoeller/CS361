@@ -21,17 +21,6 @@ class CiphertextGeneratorSettings():
         self.save_subdir = ""
         self.word_list = []
 
-    def __str__(self):
-        res = ""
-        res += "save input: " + str(self.save_input)
-        res += "\nsave plain: " + str(self.save_plain)
-        res += "\nsave enc: " + str(self.save_enc)
-        res += "\nfont size: " + str(self.font_size)
-        res += "\ncolor set: " + str(self.color_set)
-        res += "\nsave dir: " + self.save_subdir
-        res += "\nwordlist: " + str(self.word_list)
-        return res
-
 
 class SettingsHistory():
     def __init__(self):
@@ -82,30 +71,6 @@ class SettingsHistory():
             self.current_index += 1
             return self.settings_list[self.current_index]
         return 0
-
-    def __str__(self):
-        l1 = ""
-        for i in range(len(self.possible_indexes)):
-            if self.possible_indexes[i]:
-                l1 += "(T"
-            else:
-                l1 += "(F"
-            count = 0
-            if self.settings_list[i].save_plain:
-                count += 1
-            if self.settings_list[i].save_enc:
-                count += 1
-            if self.settings_list[i].save_input:
-                count += 1
-            l1 += str(count) + ")"
-        l1 += '\n'
-        l2 = ""
-        for i in range(len(self.possible_indexes)):
-            if i == self.current_index:
-                l2 += " ^  "
-            else:
-                l2 += "    "
-        return l1 + l2
 
 
 class M_Window(qtw.QMainWindow):
