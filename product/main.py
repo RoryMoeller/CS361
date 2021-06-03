@@ -135,7 +135,6 @@ class M_Window(qtw.QMainWindow):
             self.log_message("Saved the input .txt file: " + "".join(self.settings.word_list) + "_input.txt")
 
     def close_app(self):
-        # print(self.setting_history)
         exit(0)
 
     def undo_act(self):
@@ -174,7 +173,7 @@ class M_Window(qtw.QMainWindow):
 
     def log_message(self, message):
         self.ui.response_log.appendPlainText(message)
-        self.repaint()  # It took hours to find this function. It's neat.
+        self.repaint()  
 
     def update_settings(self):
         self.settings.save_input = self.ui.save_input_txt.isChecked()
