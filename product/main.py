@@ -31,31 +31,35 @@ class SettingsHistory():
         for _ in range(20):
             self.settings_list.append(CiphertextGeneratorSettings())
 
+    def set_setting_spot(self,index,cp):
+        self.settings_list[index].save_input = cp.save_input
+        self.settings_list[index].save_plain = cp.save_plain
+        self.settings_list[index].save_enc = cp.save_enc
+        self.settings_list[index].save_subdir = cp.save_subdir
+        self.settings_list[index].color_set = cp.color_set
+        self.settings_list[index].font_size = cp.font_size
+        self.settings_list[index].word_list = cp.word_list
+
+    def add_setting_to_end(self,cp):
+        for i in range(len(self.possible_indexes) - 1):
+            self.settings_list[i] = self.settings_list[i + 1]
+        self.set_setting_spot(self,19,cp)
+
+    def add_settings_to_index(self, cp):
+        self.current_index += 1  # advance pointer to current
+        self.set_setting_spot(self.current_index,cp)
+        self.possible_indexes[self.current_index] = True
+
+
     def add_settings_set(self, setting):
-        cp = setting
         if self.current_index == 19:  # if at end of settings array
-            for i in range(len(self.possible_indexes) - 1):
-                self.settings_list[i] = self.settings_list[i + 1]
-            self.settings_list[19].save_input = cp.save_input
-            self.settings_list[19].save_plain = cp.save_plain
-            self.settings_list[19].save_enc = cp.save_enc
-            self.settings_list[19].save_subdir = cp.save_subdir
-            self.settings_list[19].color_set = cp.color_set
-            self.settings_list[19].font_size = cp.font_size
-            self.settings_list[19].word_list = cp.word_list
+            self.add_setting_to_end(setting)
         else:
-            self.current_index += 1  # advance pointer to current
-            self.settings_list[self.current_index].save_input = cp.save_input
-            self.settings_list[self.current_index].save_plain = cp.save_plain
-            self.settings_list[self.current_index].save_enc = cp.save_enc
-            self.settings_list[self.current_index].save_subdir = cp.save_subdir
-            self.settings_list[self.current_index].color_set = cp.color_set
-            self.settings_list[self.current_index].font_size = cp.font_size
-            self.settings_list[self.current_index].word_list = cp.word_list
-            self.possible_indexes[self.current_index] = True
+            self.add_settings_to_index(setting)
             i = self.current_index + 1
             while i < len(self.possible_indexes):
-                self.possible_indexes[i] = False  # Unset redo history after making a change
+                # Unset redo history after making a change
+                self.possible_indexes[i] = False
                 i += 1
 
     def get_previous_setting(self):
@@ -108,7 +112,8 @@ class M_Window(qtw.QMainWindow):
         self.settings.save_subdir = self.ui.subfolder_dir.text()
         self.log_message("Started saving process...")
         if (self.settings.save_subdir == ""):
-            self.log_message("Fatal Error: No provided subdirectory to save files to. Please supply a folder name to \"Subfolder To Save to\" in Save Options ...")
+            self.log_message("Fatal Error: No provided subdirectory to save files to." + \
+                "Please supply a folder name to \"Subfolder To Save to\" in Save Options ...")
             return
         else:
             if not path.exists(self.settings.save_subdir):
@@ -144,6 +149,7 @@ class M_Window(qtw.QMainWindow):
             return
         self.settings = prev_set
         self.equate_settings()
+        self.repaint()
         self.log_message("Undid last setting change")
 
     def redo_act(self):
@@ -153,17 +159,18 @@ class M_Window(qtw.QMainWindow):
             return
         self.settings = next_set
         self.equate_settings()
+        self.repaint()
         self.log_message("Redid last undo")
 
     def get_wordcloud(self):
-        data = {
+        wc_settings = {
             'text': " ".join(self.settings.word_list),
             'size': str(self.settings.font_size),
             'color': str(self.settings.color_set)
         }
-        res = requests.post("https://word-cloud-leungd.wn.r.appspot.com/cloud", json=data)
+        response = requests.post("https://word-cloud-leungd.wn.r.appspot.com/cloud", json=wc_settings)
         try:
-            return base64.b64decode(res.text[31:-2])
+            return base64.b64decode(response.text[31:-2])
         except IndexError:
             self.log_message("Internal Error: unexpected response from wordcloud microservice")
             return 0
