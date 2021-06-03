@@ -19,9 +19,9 @@ from sys import argv, stderr
 # --require [substring to require in each attribute]
 # --save_image [subfolder to save images in]
 
+
+
 # Class for handling, setting & validating the various settings that can be passed when running the file
-
-
 class Settings:
     def __init__(self):
         self.input_url = False
@@ -116,9 +116,6 @@ class Settings:
                 print("[!] Warning: URL format should often be set to short when using other target\nContinuing...", file=stderr)
             if self.titles:
                 print("[!] Warning: Turning on titles may add unexpected text when using non-default target\nContinuing...", file=stderr)
-        # if self.save_image and self.target != ["img","src"]:
-        #     print("[!] Cannot save images if target is not img,src", file=stderr)
-        #     return False
         return True
 
     def get_commandline(self):
@@ -283,8 +280,7 @@ def save_image_to_file(settings, src):
     if src[:2] == "//":
         src = src[2:]
     if src[len(src) - 4] != ".":  # Avoid trying to save non-directly linked images
-        # print("Skipping " + src, file=stderr)
-        return
+        return # Short out of the save attempt
     if src[:5] != "http":
         src = "https://" + src
     file_name = settings.save_image
@@ -355,7 +351,6 @@ def main(argv):
     set_settings(argv, settings)
     if not settings.validate():
         exit(1)
-    # print(settings, file=stderr) # Don't really need this outside of debugging. Could add as option maybe
     if settings.socket_num == 0:
         cl_io(settings)
     else:
