@@ -321,30 +321,6 @@ def flaskified_sockets(settings):
     app.run(port=settings.socket_num)
 
 
-# Process continuous input/output from a socket connection. This was removed in favor of HTTP requests
-def socketings(settings):
-    s = socket.socket()
-    try:
-        s.bind(('localhost', int(settings.socket_num)))
-    except OSError:
-        print("[!] Unable to bind on that port.\nExiting...", file=stderr)
-        exit(1)
-    s.listen(1)
-    print("\nNow listening on port ", settings.socket_num, file=stderr)
-    while 1:
-        connection, address = s.accept()
-        print("connected", address, file=stderr)
-        req = connection.recv(1024).decode()  # what to do about size limit...
-        if len(req) > 100:
-            connection.send("Length of request is too long".encode())
-            connection.close()
-        else:
-            print("Fetching URL " + str(req), file=stderr)
-            links = get_links(req, settings)
-            connection.send(links.encode())
-            connection.close()
-
-
 # Set & validate settings. Run appropriate I/O mode function
 def main(argv):
     settings = Settings()
