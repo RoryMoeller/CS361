@@ -8,7 +8,15 @@ except ImportError:
     _MEIPASS = None
 import requests
 import base64
+from random import choice
 from os import path, makedirs
+
+
+def fake_binary_data(length):
+    response = ""
+    for i in range(length):
+        response += choice("0123456789ABCDEF")
+    return response.encode()
 
 
 class CiphertextGeneratorSettings():
@@ -49,7 +57,6 @@ class SettingsHistory():
         self.current_index += 1  # advance pointer to current
         self.set_setting_spot(self.current_index,cp)
         self.possible_indexes[self.current_index] = True
-
 
     def add_settings_set(self, setting):
         if self.current_index == 19:  # if at end of settings array
@@ -107,6 +114,12 @@ class M_Window(qtw.QMainWindow):
         icon.addPixmap(qtg.QPixmap(path), qtg.QIcon.Normal, qtg.QIcon.Off)
         self.setWindowIcon(icon)
 
+    def save_fake_bin(self,wc):
+        file = open(self.settings.save_subdir + "/" + "".join(self.settings.word_list) + "_enc.bin", "wb")
+        binary_data = fake_binary_data(len(wc))
+        file.write(binary_data)
+        file.close
+
     def save_button(self):
         self.settings.word_list = self.ui.word_list.toPlainText().split()
         self.settings.save_subdir = self.ui.subfolder_dir.text()
@@ -115,10 +128,9 @@ class M_Window(qtw.QMainWindow):
             self.log_message("Fatal Error: No provided subdirectory to save files to." + \
                 "Please supply a folder name to \"Subfolder To Save to\" in Save Options ...")
             return
-        else:
-            if not path.exists(self.settings.save_subdir):
-                makedirs(self.settings.save_subdir)
-                self.log_message("Made subdirectory: " + self.settings.save_subdir)
+        if not path.exists(self.settings.save_subdir):
+            makedirs(self.settings.save_subdir)
+            self.log_message("Made subdirectory: " + self.settings.save_subdir)
         if not (self.settings.save_plain or self.settings.save_input or self.settings.save_enc):
             self.log_message("Cancelling: there is nothing to save. Please select at least one of the file types to save in Save Options...")
             return
@@ -131,6 +143,7 @@ class M_Window(qtw.QMainWindow):
                     file.close()
                     self.log_message("Saved the plain .png file: " + "".join(self.settings.word_list) + "_plain.png")
                 if self.settings.save_enc:
+                    self.save_fake_bin(wc)
                     self.log_message("Saving encrypted files not supported yet")
             else:
                 self.log_message("Internal Error: Recieved wordcloud is empty. Abandoned saving unrecieved data.")
