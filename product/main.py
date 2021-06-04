@@ -184,6 +184,7 @@ class M_Window(qtw.QMainWindow):
                 self.log_message("Internal Error: unexpected response from wordcloud microservice")
                 return 0
         else:
+            self.log_message("Internal Error: unexpected response from wordcloud microservice")
             return 0
 
     def log_message(self, message):
