@@ -8,7 +8,6 @@ except ImportError:
     _MEIPASS = None
 import requests
 import base64
-from random import choice
 from os import path, makedirs, urandom as fake_binary_data
 
 
