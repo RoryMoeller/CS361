@@ -9,11 +9,7 @@ except ImportError:
 import requests
 import base64
 from random import choice
-from os import path, makedirs, urandom as random_binary
-
-
-def fake_binary_data(length):
-    return random_binary(length)
+from os import path, makedirs, urandom as fake_binary_data
 
 
 class CiphertextGeneratorSettings():
@@ -179,13 +175,16 @@ class M_Window(qtw.QMainWindow):
             'color': str(self.settings.color_set)
         }
         response = requests.post("https://word-cloud-leungd.wn.r.appspot.com/cloud", json=wc_settings)
-        try:
-            return base64.b64decode(response.text[32:-2])
-        except IndexError:
-            self.log_message("Internal Error: unexpected response from wordcloud microservice")
-            return 0
-        except base64.binascii.Error:
-            self.log_message("Internal Error: unexpected response from wordcloud microservice")
+        if response.status_code == 200:
+            try:
+                return base64.b64decode(response.text[32:-2])
+            except IndexError:
+                self.log_message("Internal Error: unexpected response from wordcloud microservice")
+                return 0
+            except base64.binascii.Error:
+                self.log_message("Internal Error: unexpected response from wordcloud microservice")
+                return 0
+        else:
             return 0
 
     def log_message(self, message):
