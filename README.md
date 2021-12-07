@@ -1,6 +1,5 @@
-# CS361
-## Things made for CS361
+# Web Scraping Team Project
 * [Wiki Scraping Microservice](/microservice)
-* [Ciphertext Generator](/product)
+* [Ciphertext Generator with GUI](/product)
 
 [Latest Release](https://github.com/RoryMoeller/CS361/releases/latest)
